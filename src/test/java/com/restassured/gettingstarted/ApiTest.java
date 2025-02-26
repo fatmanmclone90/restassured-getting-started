@@ -5,8 +5,8 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
-import models.RequestBody;
-import models.Response;
+import com.restassured.gettingstarted.models.RequestBody;
+import com.restassured.gettingstarted.models.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import static io.restassured.RestAssured.*;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -151,6 +152,15 @@ public class ApiTest {
                 .then()
                 .header("type", response -> equalTo(response.body().jsonPath().get("type").toString())) // compare headers and body
                 .contentType(ContentType.JSON.withCharset(UTF_8));
+    }
+
+    @Test
+    public void get_jsonSchemaValidation(){
+        given()
+                .when()
+                .get("/somewhere")
+                .then()
+                .assertThat().body(matchesJsonSchemaInClasspath("Response.json"));
     }
 
     Function<String, Integer> stringToInt = s -> Integer.parseInt(s);

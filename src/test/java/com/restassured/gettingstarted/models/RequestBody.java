@@ -1,4 +1,4 @@
-package models;
+package com.restassured.gettingstarted.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
