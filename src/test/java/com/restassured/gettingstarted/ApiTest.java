@@ -1,14 +1,11 @@
 package com.restassured.gettingstarted;
 
 import com.restassured.gettingstarted.filters.MyFilter;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
-import io.restassured.http.ContentType;
 import com.restassured.gettingstarted.models.RequestBody;
 import com.restassured.gettingstarted.models.Response;
-import io.restassured.specification.QueryableRequestSpecification;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.specification.SpecificationQuerier;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,30 +17,32 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.preemptive;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApiTest {
 
     @BeforeAll
-    public static void setup(){
+    public static void setup() {
         // sets globally
         RestAssured.requestSpecification = new RequestSpecBuilder()
-        .setBaseUri("http://localhost")
-        .setPort(3000)
-        .addHeader("User-Agent", UUID.randomUUID().toString())
-        .setAuth(preemptive().basic("user", "password"))
-        .setContentType(ContentType.JSON)
-        .build();
+                .setBaseUri("http://localhost")
+                .setPort(3000)
+                .addHeader("User-Agent", UUID.randomUUID().toString())
+                .setAuth(preemptive().basic("user", "password"))
+                .setContentType(ContentType.JSON)
+                .build();
         // RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @Test
-    public void get_jsonBodyAssert(){
+    public void get_jsonBodyAssert() {
         given()
                 .when()
                 .get("/somewhere")
@@ -55,7 +54,7 @@ public class ApiTest {
 
     // fussy on formatting
     @Test
-    public void get_stringBodyAssert(){
+    public void get_stringBodyAssert() {
         var body = given()
                 .when()
                 .get("/somewhere")
@@ -66,14 +65,14 @@ public class ApiTest {
                 .asString();
 
         assertEquals("""
-    {
-      "status": "ok",
-      "type": 2
-    }""", body);
+                {
+                  "status": "ok",
+                  "type": 2
+                }""", body);
     }
 
     @Test
-    public void get_pojoAssert(){
+    public void get_pojoAssert() {
         var response = given()
                 .when()
                 .get("/somewhere")
@@ -114,8 +113,8 @@ public class ApiTest {
     @Test
     public void post_bodyJObject() throws JSONException {
         JSONObject jsonObj = new JSONObject()
-                .put("phoneNumber","353837986524")
-                .put("messageContent","test");
+                .put("phoneNumber", "353837986524")
+                .put("messageContent", "test");
         given()
                 .body(jsonObj.toString())
                 .when()
@@ -126,7 +125,7 @@ public class ApiTest {
     }
 
     @Test
-    public void post_bodyPojo()  {
+    public void post_bodyPojo() {
         var request = new RequestBody("123");
         given()
                 .body(request)
@@ -138,7 +137,7 @@ public class ApiTest {
     }
 
     @Test
-    public void get_hamcrestMatcher()  {
+    public void get_hamcrestMatcher() {
         given()
                 .when()
                 .get("/somewhere")
@@ -149,7 +148,7 @@ public class ApiTest {
     }
 
     @Test
-    public void get_responseAwareMatcher()  {
+    public void get_responseAwareMatcher() {
         var request = new RequestBody("123");
         given()
                 .when()
@@ -160,7 +159,7 @@ public class ApiTest {
     }
 
     @Test
-    public void get_jsonSchemaValidation(){
+    public void get_jsonSchemaValidation() {
         given()
                 .when()
                 .get("/somewhere")
@@ -169,7 +168,7 @@ public class ApiTest {
     }
 
     @Test
-    public void get_pathParam(){
+    public void get_pathParam() {
         var id = 50;
         given()
                 .when()
@@ -194,14 +193,14 @@ public class ApiTest {
     }
 
     @Test
-    public void get_customFilter(){
+    public void get_customFilter() {
         given()
-            .when()
-            .filter(new MyFilter())
-            .get("somewhere")
-            .then()
-            .assertThat()
-            .statusCode(200);
+                .when()
+                .filter(new MyFilter())
+                .get("somewhere")
+                .then()
+                .assertThat()
+                .statusCode(200);
     }
 
 
