@@ -1,5 +1,6 @@
 package com.restassured.gettingstarted;
 
+import com.restassured.gettingstarted.filters.MyFilter;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -7,6 +8,8 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import com.restassured.gettingstarted.models.RequestBody;
 import com.restassured.gettingstarted.models.Response;
+import io.restassured.specification.QueryableRequestSpecification;
+import io.restassured.specification.SpecificationQuerier;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,8 +36,10 @@ public class ApiTest {
         .setPort(3000)
         .addHeader("User-Agent", UUID.randomUUID().toString())
         .setAuth(preemptive().basic("user", "password"))
+        .setContentType(ContentType.JSON)
         .build();
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        // RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @Test
@@ -162,6 +167,43 @@ public class ApiTest {
                 .then()
                 .assertThat().body(matchesJsonSchemaInClasspath("Response.json"));
     }
+
+    @Test
+    public void get_pathParam(){
+        var id = 50;
+        given()
+                .when()
+                .get("somewhere/{id}", id)
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .body("id", equalTo(id));
+
+    }
+
+    @Test
+    public void query_Spec() {
+        var spec = new RequestSpecBuilder()
+                .addHeader("foo", "bar")
+                .build();
+
+        var queryable = SpecificationQuerier.query(spec);
+        var headerValue = queryable.getHeaders().getValue("foo");
+
+        assertEquals("bar", headerValue);
+    }
+
+    @Test
+    public void get_customFilter(){
+        given()
+            .when()
+            .filter(new MyFilter())
+            .get("somewhere")
+            .then()
+            .assertThat()
+            .statusCode(200);
+    }
+
 
     Function<String, Integer> stringToInt = s -> Integer.parseInt(s);
 }
